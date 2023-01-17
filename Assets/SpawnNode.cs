@@ -21,7 +21,7 @@ public class SpawnNode : Node
     protected override void OnDrawGizmosSelected() 
         => base.OnDrawGizmosSelected();
 
-    public Node GetSpawnNode()
+    public static Node GetSpawnNode()
     {
         if (SpawnNodes is null || SpawnNodes.Count == 0)
             return null;

@@ -24,6 +24,9 @@ public class AmmoNode : Node
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Agent"))
-            Debug.Log($"Adds ammo to {other.name}!");
+        {
+            other.GetComponent<AgentController>()?.RefillAmmo();
+            Debug.Log($"{other.name} refilled ammo!");
+        }
     }
 }

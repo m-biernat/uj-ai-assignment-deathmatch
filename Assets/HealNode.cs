@@ -24,6 +24,9 @@ public class HealNode : Node
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Agent"))
-            Debug.Log($"Heals {other.name}!");
+        {
+            other.GetComponent<AgentController>()?.Heal();
+            Debug.Log($"{other.name} healed!");
+        }
     }
 }
