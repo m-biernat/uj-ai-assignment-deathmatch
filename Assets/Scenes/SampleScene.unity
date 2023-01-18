@@ -132,7 +132,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 48722886}
-  - component: {fileID: 48722887}
   m_Layer: 0
   m_Name: Graph
   m_TagString: Untagged
@@ -165,20 +164,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &48722887
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 48722885}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 16f0649e322a58b468fafb1072772c3d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  A: {fileID: 964357683}
-  B: {fileID: 1372014311}
 --- !u!1 &79303718
 GameObject:
   m_ObjectHideFlags: 0
@@ -2019,7 +2004,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1075503042}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -23.39, y: 9.66, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2054,6 +2039,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ed4d0629366ce94197a48be4a92cdbf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Health>k__BackingField: 0
+  <MaxHealth>k__BackingField: 100
+  <Ammo>k__BackingField: 0
+  <MaxAmmo>k__BackingField: 30
+  <ShootJitterAngle>k__BackingField: 15
+  <ShootDamageRange>k__BackingField: 50
+  <MovementSpeed>k__BackingField: 3
+  <RotationSpeed>k__BackingField: 1
+  start: {fileID: 6103505050434328985}
+  end: {fileID: 888751029}
 --- !u!1 &1115943135
 GameObject:
   m_ObjectHideFlags: 0

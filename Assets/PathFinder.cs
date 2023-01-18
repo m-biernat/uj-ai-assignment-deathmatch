@@ -1,18 +1,13 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PathFinder : MonoBehaviour
+public static class PathFinder
 {
-    public Node A;
-    public Node B;
+    static Queue<Request> _requests;
 
-    void Start()
-    {
-        Find(A, B);
-    }
+    
 
-    public void Find(Node start, Node end)
+    public static List<Node> Find(Node start, Node end)
     {
         var open = new List<Node>();
         var closed = new List<Node>();
@@ -64,7 +59,20 @@ public class PathFinder : MonoBehaviour
         }
 
         path.ForEach((n) => Debug.Log(n));
+
+        return path;
     }
 
+    public struct Request
+    {
+        public AgentController owner;
 
+        public Node goal;
+
+        public Request(AgentController owner, Node goal)
+        {
+            this.owner = owner;
+            this.goal = goal;
+        }
+    }
 }

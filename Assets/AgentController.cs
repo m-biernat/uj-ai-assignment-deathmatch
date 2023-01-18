@@ -15,13 +15,31 @@ public class AgentController : MonoBehaviour
     [field: SerializeField]
     public int MaxAmmo { get; private set; } = 30;
 
-    public List<AgentController> Agents { get; private set; } = null;
+    public static List<AgentController> Agents { get; private set; } = null;
 
     [field: SerializeField]
     public float ShootJitterAngle { get; private set; } = 15.0f;
 
     [field: SerializeField]
     public int ShootDamageRange { get; private set; } = 50;
+
+    [field: SerializeField]
+    public float MovementSpeed { get; private set; } = 1.0f;
+    
+    [field: SerializeField]
+    public float RotationSpeed { get; private set; } = 1.0f;
+
+    List<Node> _path;
+
+    Node _currentTarget;
+
+    Node _currentNode;
+
+    public Node start;
+
+    public Node end;
+
+    Collider2D _collider;
 
     void Awake()
     {
@@ -32,11 +50,33 @@ public class AgentController : MonoBehaviour
 
         Heal();
         RefillAmmo();
+
+        _currentNode = start;
+
+        _collider = GetComponent<Collider2D>();
+    }
+
+    void Start() 
+    {
+        if (start != end)
+            _path = PathFinder.Find(_currentNode, end);
+    }
+
+    void Update()
+    {
+        List<GameObject> agents;
+        if (Detect(out agents))
+            Shoot(PickRandomEnemy(agents));
+
+        FollowPath();
+
+        Debug.DrawRay(transform.position, transform.up, Color.white);
     }
 
     public void Respawn()
     {
         var spawnNode = SpawnNode.GetSpawnNode();
+        _currentNode = spawnNode;
         transform.position = spawnNode.Position;
         
         Heal();
@@ -51,34 +91,32 @@ public class AgentController : MonoBehaviour
 
     public bool Detect(out List<GameObject> agents)
     {
-        if (Agents is null || Agents.Count == 0)
-        {
-            agents = null;
-            return false;
-        }
-
         agents = new List<GameObject>();
         var detected = false;
+
+        _collider.enabled = false;
 
         foreach (var agent in Agents)
         {
             if (agent == this)
                 continue;
 
-            if (Vector3.Dot(transform.forward, agent.transform.forward) > .5f)
-            {
-                var dir = agent.transform.position - transform.position;
-                
-                RaycastHit hit;
+            var dir = agent.transform.position - transform.position;
+            dir.Normalize();
 
-                if (Physics.Raycast(transform.position, dir, out hit)
-                    && hit.collider.CompareTag("Agent"))
+            if (Vector3.Dot(transform.up, dir) > .5f)
+            {
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, dir);
+
+                if (hit && hit.collider.CompareTag("Agent"))
                 {
                     detected = true;
                     agents.Add(hit.collider.gameObject);
                 }
             }
         }
+
+        _collider.enabled = true;
 
         return detected;
     }
@@ -88,7 +126,37 @@ public class AgentController : MonoBehaviour
         if (enemies is null)
             return null;
 
-        var enemyGO = enemies[Random.Range(0, enemies.Count - 1)];
+        GameObject enemyGO;
+        
+        if (enemies.Count == 1)
+            enemyGO = enemies[0];
+        else
+            enemyGO = enemies[Random.Range(0, enemies.Count - 1)];
+
+        return enemyGO?.GetComponent<AgentController>();
+    }
+
+    public AgentController PickClosestEnemy(List<GameObject> enemies)
+    {
+        if (enemies is null)
+            return null;
+
+        GameObject enemyGO = enemies[0];
+        var minDist = Mathf.Infinity;
+        
+        if (enemies.Count > 1)
+        {
+            foreach (var enemy in enemies)
+            {
+                var dist = Vector3.Distance(transform.position, 
+                                            enemy.transform.position);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    enemyGO = enemy;
+                }
+            }
+        }
 
         return enemyGO?.GetComponent<AgentController>();
     }
@@ -97,7 +165,7 @@ public class AgentController : MonoBehaviour
     {
         if (Ammo <= 0)
         {
-            Debug.Log($"{gameObject.name} out of ammo!");
+            Debug.Log($"{gameObject.name} is out of ammo!");
             return;
         }
 
@@ -109,14 +177,18 @@ public class AgentController : MonoBehaviour
 
         dir = Quaternion.Euler(0, 0, jitter) * dir;
 
-        RaycastHit hit;
+        _collider.enabled = false;
+        
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, dir);
+        Debug.DrawLine(transform.position, hit.point, Color.red, 2.0f);
 
-        if (Physics.Raycast(transform.position, dir, out hit)
-            && hit.collider.CompareTag("Agent"))
+        if (hit.collider.CompareTag("Agent"))
         {
-            var damage = Random.Range(-ShootDamageRange, ShootDamageRange);
+            var damage = Random.Range(1, ShootDamageRange);
             hit.collider?.GetComponent<AgentController>()?.Hit(damage);
         }
+        
+        _collider.enabled = true;
     }
 
     public void Hit(int damage)
@@ -127,6 +199,48 @@ public class AgentController : MonoBehaviour
         {
             Debug.Log($"{gameObject.name} died!");
             gameObject.SetActive(false);
+        }
+    }
+
+    public void SetPath(List<Node> path)
+    {
+        _path = path;
+        _currentTarget = null;
+    }
+
+    public void FollowPath()
+    {
+        if (_currentTarget is null)
+        {
+            if (_path is null)
+                return;
+            
+            _currentTarget = _path[_path.Count - 1];
+        }
+
+        var targetPosition = _currentTarget.Position;
+        var targetDirection = targetPosition - transform.position;
+
+        var movementStep = MovementSpeed * Time.deltaTime;
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, movementStep);
+
+        var rotationStep = RotationSpeed * Time.deltaTime;
+        transform.up = Vector3.RotateTowards(transform.up, targetDirection, rotationStep, 0.0f);
+
+        if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
+        {
+            _currentNode = _currentTarget;
+
+            if (_path.Count > 1)
+            {
+                _path.RemoveAt(_path.Count - 1);
+                _currentTarget = _path[_path.Count - 1];
+            }
+            else
+            {
+                _currentTarget = null;
+                _path = null;
+            }
         }
     }
 }
