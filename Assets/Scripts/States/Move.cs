@@ -21,7 +21,7 @@ public class Move : BaseState<AgentBehaviourSM>
                 _agentController.TargetClosestAmmo();
         }
         else {
-            if (_agentController.TargetNode.Type != NodeType.Node)
+            if (_agentController.TargetNode.Type != NodeType.Node || _agentController.Pathless())
                 _agentController.TargetRandomNode();
         }
     }
@@ -30,15 +30,10 @@ public class Move : BaseState<AgentBehaviourSM>
     {
         List<GameObject> agents;
         if (_agentController.Detect(out agents))
-            Debug.Log("DUPA");
+            _stateMachine.ChangeState(_stateMachine.AttackState);
 
         _agentController.FollowPath(OnComplete);
     }
 
-    void OnComplete() {
-        Debug.Log("DUPA");
-        _agentController.TargetRandomNode();
-    }
-
-    public override void Exit() {}
+    void OnComplete() => _agentController.TargetRandomNode();
 }

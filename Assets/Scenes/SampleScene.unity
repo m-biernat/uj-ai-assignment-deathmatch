@@ -633,6 +633,7 @@ GameObject:
   - component: {fileID: 273511917}
   - component: {fileID: 273511920}
   - component: {fileID: 273511916}
+  - component: {fileID: 273511921}
   m_Layer: 0
   m_Name: Agent (1)
   m_TagString: Agent
@@ -672,10 +673,12 @@ MonoBehaviour:
   <MaxHealth>k__BackingField: 100
   <Ammo>k__BackingField: 0
   <MaxAmmo>k__BackingField: 30
-  <ShootJitterAngle>k__BackingField: 15
-  <ShootDamageRange>k__BackingField: 50
   <MovementSpeed>k__BackingField: 3
   <RotationSpeed>k__BackingField: 75
+  <ShootAngleJitter>k__BackingField: 15
+  <ShootDamageJitter>k__BackingField: 50
+  <ShootCooldown>k__BackingField: 0.03
+  <RespawnCooldown>k__BackingField: 5
   <InitialNode>k__BackingField: {fileID: 1067592083}
   <TargetNode>k__BackingField: {fileID: 1126358723}
 --- !u!212 &273511918
@@ -758,6 +761,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _currentState: 
+--- !u!50 &273511921
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 273511915}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &379411512
 GameObject:
   m_ObjectHideFlags: 0
@@ -2089,6 +2113,7 @@ GameObject:
   - component: {fileID: 1075503046}
   - component: {fileID: 1075503047}
   - component: {fileID: 1075503045}
+  - component: {fileID: 1075503048}
   m_Layer: 0
   m_Name: Agent
   m_TagString: Agent
@@ -2195,10 +2220,12 @@ MonoBehaviour:
   <MaxHealth>k__BackingField: 100
   <Ammo>k__BackingField: 0
   <MaxAmmo>k__BackingField: 30
-  <ShootJitterAngle>k__BackingField: 15
-  <ShootDamageRange>k__BackingField: 50
   <MovementSpeed>k__BackingField: 3
   <RotationSpeed>k__BackingField: 75
+  <ShootAngleJitter>k__BackingField: 15
+  <ShootDamageJitter>k__BackingField: 50
+  <ShootCooldown>k__BackingField: 0.03
+  <RespawnCooldown>k__BackingField: 5
   <InitialNode>k__BackingField: {fileID: 6103505050434328985}
   <TargetNode>k__BackingField: {fileID: 131611656}
 --- !u!114 &1075503047
@@ -2214,6 +2241,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _currentState: 
+--- !u!50 &1075503048
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075503042}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &1115943135
 GameObject:
   m_ObjectHideFlags: 0

@@ -35,7 +35,6 @@ public class PathFinder : MonoBehaviour
         {
             var agentController = _requests.Dequeue();
         
-            Debug.Log("DING");
             agentController.SetPath(Find(agentController.CurrentNode, agentController.TargetNode));
         }
 

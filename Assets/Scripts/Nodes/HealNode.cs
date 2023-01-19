@@ -21,12 +21,17 @@ public class HealNode : Node
     protected override void OnDrawGizmosSelected() 
         => base.OnDrawGizmosSelected();
 
-    private void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Agent"))
         {
-            other.GetComponent<AgentController>()?.Heal();
-            Debug.Log($"{other.name} healed!");
+            var agentController = other.GetComponent<AgentController>();
+
+            if (agentController.Health < agentController.MaxHealth)
+            {
+                agentController.Heal();
+                Debug.Log($"{other.name} healed!");
+            }
         }
     }
 

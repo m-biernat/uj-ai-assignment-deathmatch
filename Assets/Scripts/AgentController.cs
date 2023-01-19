@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class AgentController : MonoBehaviour
 {
+    public static List<AgentController> Agents { get; private set; } = null;
+
     [field: SerializeField]
     public int Health { get; private set; }
 
@@ -15,21 +17,25 @@ public class AgentController : MonoBehaviour
     [field: SerializeField]
     public int MaxAmmo { get; private set; } = 30;
 
-    public static List<AgentController> Agents { get; private set; } = null;
-
-    [field: SerializeField]
-    public float ShootJitterAngle { get; private set; } = 15.0f;
-
-    [field: SerializeField]
-    public int ShootDamageRange { get; private set; } = 50;
-
-    [field: SerializeField]
+    [field: SerializeField, Space]
     public float MovementSpeed { get; private set; } = 1.0f;
     
     [field: SerializeField]
     public float RotationSpeed { get; private set; } = 1.0f;
 
+    [field: SerializeField, Space]
+    public float ShootAngleJitter { get; private set; } = 15.0f;
+
     [field: SerializeField]
+    public int ShootDamageJitter { get; private set; } = 50;
+
+    [field: SerializeField, Space]
+    public float ShootCooldown { get; private set; } = 0.03f;
+
+    [field: SerializeField]
+    public float RespawnCooldown { get; private set; } = 5.0f;
+
+    [field: SerializeField, Space]
     public Node InitialNode { get; private set; }
 
     [field: SerializeField]
@@ -42,6 +48,8 @@ public class AgentController : MonoBehaviour
     List<Node> _path;
 
     Collider2D _collider;
+
+    SpriteRenderer _renderer;
 
     void Awake()
     {
@@ -56,21 +64,17 @@ public class AgentController : MonoBehaviour
         CurrentNode = InitialNode;
 
         _collider = GetComponent<Collider2D>();
+        _renderer = GetComponent<SpriteRenderer>();
     }
 
     void Start() 
     {
         if (InitialNode != TargetNode)
             PathFinder.Instance.EnqueueRequest(this);
-        //TargetRandomNode();
     }
 
-    void Update()
-    {
-        
-
-        Debug.DrawRay(transform.position, transform.up, Color.white);
-    }
+    void Update() 
+        => Debug.DrawRay(transform.position, transform.up, Color.white);
 
     public void Respawn()
     {
@@ -78,10 +82,14 @@ public class AgentController : MonoBehaviour
         CurrentNode = spawnNode;
         transform.position = spawnNode.Position;
         
+        _currentTarget = null;
+        _path = null;
+
         Heal();
         RefillAmmo();
         
-        gameObject.SetActive(true);
+        _collider.enabled = true;
+        _renderer.enabled = true;
     }
 
     public void Heal() => Health = MaxHealth;
@@ -160,19 +168,16 @@ public class AgentController : MonoBehaviour
         return enemyGO?.GetComponent<AgentController>();
     }
 
-    public void Shoot(AgentController enemy)
+    public void Shoot(AgentController enemy, System.Action OutOfAmmo)
     {
         if (Ammo <= 0)
-        {
-            Debug.Log($"{gameObject.name} is out of ammo!");
             return;
-        }
 
         Ammo -= 1;
 
         var dir = enemy.transform.position - transform.position;
         
-        var jitter = Random.Range(-ShootJitterAngle, ShootJitterAngle);
+        var jitter = Random.Range(-ShootAngleJitter, ShootAngleJitter);
 
         dir = Quaternion.Euler(0, 0, jitter) * dir;
 
@@ -183,11 +188,16 @@ public class AgentController : MonoBehaviour
 
         if (hit.collider.CompareTag("Agent"))
         {
-            var damage = Random.Range(1, ShootDamageRange);
+            var damage = Random.Range(1, ShootDamageJitter);
             hit.collider?.GetComponent<AgentController>()?.Hit(damage);
         }
         
         _collider.enabled = true;
+
+        if (Ammo == 0) {
+            Debug.Log($"{transform.name} is out of ammo!");
+            OutOfAmmo?.Invoke();
+        }
     }
 
     public void Hit(int damage)
@@ -197,7 +207,12 @@ public class AgentController : MonoBehaviour
         if (Health <= 0)
         {
             Debug.Log($"{gameObject.name} died!");
-            gameObject.SetActive(false);
+            
+            _collider.enabled = false;
+            _renderer.enabled = false;
+
+            var sm = GetComponent<AgentBehaviourSM>();
+            sm.ChangeState(sm.DeathState);
         }
     }
 
@@ -225,11 +240,13 @@ public class AgentController : MonoBehaviour
         _currentTarget = null;
     }
 
+    public bool Pathless() => _path is null;
+
     public void FollowPath(System.Action onComplete)
     {
         if (_currentTarget is null)
         {
-            if (_path is null)
+            if (_path is null || _path.Count == 0) 
                 return;
             
             _currentTarget = _path[_path.Count - 1];

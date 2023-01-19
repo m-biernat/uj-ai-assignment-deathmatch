@@ -8,6 +8,8 @@ public class AgentBehaviourSM : StateMachine<AgentBehaviourSM>
 
     public Attack AttackState { get; private set; }
 
+    public Death DeathState { get; private set; }
+
     public Resupply ResupplyState { get; private set; }
 
     void Awake()
@@ -16,6 +18,7 @@ public class AgentBehaviourSM : StateMachine<AgentBehaviourSM>
 
         MoveState = new Move(this);
         AttackState = new Attack(this);
+        DeathState = new Death(this);
         ResupplyState = new Resupply(this);
     }
 

@@ -21,12 +21,17 @@ public class AmmoNode : Node
     protected override void OnDrawGizmosSelected() 
         => base.OnDrawGizmosSelected();
 
-    private void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Agent"))
         {
-            other.GetComponent<AgentController>()?.RefillAmmo();
-            Debug.Log($"{other.name} refilled ammo!");
+            var agentController = other.GetComponent<AgentController>();
+
+            if (agentController.Ammo < agentController.MaxAmmo)
+            {
+                agentController.RefillAmmo();
+                Debug.Log($"{other.name} refilled ammo!");
+            }
         }
     }
 
