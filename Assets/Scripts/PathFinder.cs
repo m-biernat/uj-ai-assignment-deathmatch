@@ -60,13 +60,14 @@ public class PathFinder : MonoBehaviour
         {
             foreach (var vert in curr.Vertices)
             {
-                if (closed.Contains(vert) && open.Contains(vert))
+                if (closed.Contains(vert))
                     continue;
 
-                open.Add(vert);
+                if (!open.Contains(vert))
+                    open.Add(vert);
 
-                vert.CalculateH(end);
                 var g = vert.CalculateG(curr);
+                vert.CalculateH(end);
                 var f = g + vert.H;
 
                 if (f < vert.F)

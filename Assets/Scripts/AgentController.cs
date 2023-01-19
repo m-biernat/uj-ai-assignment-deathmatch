@@ -239,10 +239,13 @@ public class AgentController : MonoBehaviour
         var targetDirection = targetPosition - transform.position;
 
         var movementStep = MovementSpeed * Time.deltaTime;
-        transform.position = Vector3.MoveTowards(transform.position, targetPosition, movementStep);
+        var movement = Vector3.MoveTowards(transform.position, targetPosition, movementStep);
 
         var rotationStep = RotationSpeed * Time.deltaTime;
-        transform.up = Vector3.RotateTowards(transform.up, targetDirection, rotationStep, 0.0f);
+        var targetRotation = Quaternion.LookRotation(Vector3.forward, targetDirection);
+        var rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationStep);
+        
+        transform.SetPositionAndRotation(movement, rotation);
 
         if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
         {
