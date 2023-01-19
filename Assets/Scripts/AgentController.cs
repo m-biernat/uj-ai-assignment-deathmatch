@@ -43,6 +43,12 @@ public class AgentController : MonoBehaviour
 
     public Node CurrentNode { get; private set; }
 
+    [field: SerializeField, Space]
+    public int Kills { get; private set; } = 0;
+
+    [field: SerializeField]
+    public int Deaths { get; private set; } = 0;
+
     Node _currentTarget;
 
     List<Node> _path;
@@ -184,12 +190,12 @@ public class AgentController : MonoBehaviour
         _collider.enabled = false;
         
         RaycastHit2D hit = Physics2D.Raycast(transform.position, dir);
-        Debug.DrawLine(transform.position, hit.point, Color.red, 2.0f);
+        Debug.DrawLine(transform.position, hit.point, _renderer.color, 2.0f);
 
         if (hit.collider.CompareTag("Agent"))
         {
             var damage = Random.Range(1, ShootDamageJitter);
-            hit.collider?.GetComponent<AgentController>()?.Hit(damage);
+            hit.collider?.GetComponent<AgentController>()?.Hit(damage, this);
         }
         
         _collider.enabled = true;
@@ -200,7 +206,7 @@ public class AgentController : MonoBehaviour
         }
     }
 
-    public void Hit(int damage)
+    public void Hit(int damage, AgentController enemy)
     {
         Health -= damage;
 
@@ -213,6 +219,9 @@ public class AgentController : MonoBehaviour
 
             var sm = GetComponent<AgentBehaviourSM>();
             sm.ChangeState(sm.DeathState);
+
+            Deaths++;
+            enemy.Kills++;
         }
     }
 

@@ -11,6 +11,8 @@ public class Death : BaseState<AgentBehaviourSM>
         _agentController = agentBehaviourSM.GetAgentController();
     }
 
+    public override void Enter() => _cooldown = 0.0f;
+
     public override void Update() 
     {
         _cooldown += Time.deltaTime;
