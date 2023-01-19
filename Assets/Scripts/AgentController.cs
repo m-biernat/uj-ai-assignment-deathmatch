@@ -29,15 +29,17 @@ public class AgentController : MonoBehaviour
     [field: SerializeField]
     public float RotationSpeed { get; private set; } = 1.0f;
 
-    List<Node> _path;
+    [field: SerializeField]
+    public Node InitialNode { get; private set; }
+
+    [field: SerializeField]
+    public Node TargetNode { get; private set; }
+
+    public Node CurrentNode { get; private set; }
 
     Node _currentTarget;
 
-    Node _currentNode;
-
-    public Node start;
-
-    public Node end;
+    List<Node> _path;
 
     Collider2D _collider;
 
@@ -51,24 +53,21 @@ public class AgentController : MonoBehaviour
         Heal();
         RefillAmmo();
 
-        _currentNode = start;
+        CurrentNode = InitialNode;
 
         _collider = GetComponent<Collider2D>();
     }
 
     void Start() 
     {
-        if (start != end)
-            _path = PathFinder.Find(_currentNode, end);
+        if (InitialNode != TargetNode)
+            PathFinder.Instance.EnqueueRequest(this);
+        //TargetRandomNode();
     }
 
     void Update()
     {
-        List<GameObject> agents;
-        if (Detect(out agents))
-            Shoot(PickRandomEnemy(agents));
-
-        FollowPath();
+        
 
         Debug.DrawRay(transform.position, transform.up, Color.white);
     }
@@ -76,7 +75,7 @@ public class AgentController : MonoBehaviour
     public void Respawn()
     {
         var spawnNode = SpawnNode.GetSpawnNode();
-        _currentNode = spawnNode;
+        CurrentNode = spawnNode;
         transform.position = spawnNode.Position;
         
         Heal();
@@ -202,13 +201,31 @@ public class AgentController : MonoBehaviour
         }
     }
 
+    public void TargetClosestHeal()
+    {
+        TargetNode = HealNode.GetClosestNode(transform.position);
+        PathFinder.Instance.EnqueueRequest(this);
+    }
+
+    public void TargetClosestAmmo()
+    {
+        TargetNode = AmmoNode.GetClosestNode(transform.position);
+        PathFinder.Instance.EnqueueRequest(this);
+    }
+
+    public void TargetRandomNode()
+    {
+        TargetNode = Node.GetRandomNodeOfType(CurrentNode, NodeType.Node);
+        PathFinder.Instance.EnqueueRequest(this);
+    }
+
     public void SetPath(List<Node> path)
     {
         _path = path;
         _currentTarget = null;
     }
 
-    public void FollowPath()
+    public void FollowPath(System.Action onComplete)
     {
         if (_currentTarget is null)
         {
@@ -229,7 +246,7 @@ public class AgentController : MonoBehaviour
 
         if (Vector3.Distance(transform.position, targetPosition) < 0.001f)
         {
-            _currentNode = _currentTarget;
+            CurrentNode = _currentTarget;
 
             if (_path.Count > 1)
             {
@@ -240,6 +257,7 @@ public class AgentController : MonoBehaviour
             {
                 _currentTarget = null;
                 _path = null;
+                onComplete?.Invoke();
             }
         }
     }

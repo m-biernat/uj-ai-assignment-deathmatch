@@ -77,6 +77,17 @@ public class Node : MonoBehaviour
             Gizmos.DrawLine(Position, vert.Position);
         }
     }
+
+    public static Node GetRandomNodeOfType(Node currentNode, NodeType type)
+    {
+        Node node;
+
+        do 
+            node = Nodes[Random.Range(0, Nodes.Count)];
+        while (node == currentNode || node.Type != type);
+        
+        return node;
+    }
 }
 
 public enum NodeType 

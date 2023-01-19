@@ -29,4 +29,29 @@ public class HealNode : Node
             Debug.Log($"{other.name} healed!");
         }
     }
+
+    public static Node GetClosestNode(Vector3 position)
+    {
+        if (HealNodes is null || HealNodes.Count == 0)
+            return null;
+
+        if (HealNodes.Count == 1)
+            return HealNodes[0];
+
+        var closest = HealNodes[0];
+        var minDist = int.MaxValue;
+
+        foreach (var node in HealNodes)
+        {
+            var dist = Distance.Manhattan(position, node.Position);
+
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closest = node;
+            }
+        }
+
+        return closest;
+    }
 }

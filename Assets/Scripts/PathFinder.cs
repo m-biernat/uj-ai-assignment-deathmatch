@@ -1,11 +1,48 @@
 using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
-public static class PathFinder
+public class PathFinder : MonoBehaviour
 {
-    static Queue<Request> _requests;
+    public static PathFinder Instance { get; private set; }
 
-    
+    UniqueQueue<AgentController> _requests;
+
+    bool _active = false;
+
+    void Awake()
+    {
+        if (Instance is null)
+        {
+            Instance = this;
+            _requests = new UniqueQueue<AgentController>();
+        }
+    }
+
+    public void EnqueueRequest(AgentController agentController)
+    {
+        _requests.Enqueue(agentController);
+
+        if (!_active)
+            StartCoroutine(ProcessRequests());
+    }
+
+    IEnumerator ProcessRequests()
+    {
+        _active = true;
+
+        while (_requests.Count > 0)
+        {
+            var agentController = _requests.Dequeue();
+        
+            Debug.Log("DING");
+            agentController.SetPath(Find(agentController.CurrentNode, agentController.TargetNode));
+        }
+
+        _active = false;
+
+        yield return null;
+    }
 
     public static List<Node> Find(Node start, Node end)
     {
@@ -58,21 +95,8 @@ public static class PathFinder
             curr = curr.P;
         }
 
-        path.ForEach((n) => Debug.Log(n));
+        //path.ForEach((n) => Debug.Log(n));
 
         return path;
-    }
-
-    public struct Request
-    {
-        public AgentController owner;
-
-        public Node goal;
-
-        public Request(AgentController owner, Node goal)
-        {
-            this.owner = owner;
-            this.goal = goal;
-        }
     }
 }

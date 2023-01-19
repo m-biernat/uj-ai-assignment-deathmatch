@@ -29,4 +29,29 @@ public class AmmoNode : Node
             Debug.Log($"{other.name} refilled ammo!");
         }
     }
+
+    public static Node GetClosestNode(Vector3 position)
+    {
+        if (AmmoNodes is null || AmmoNodes.Count == 0)
+            return null;
+
+        if (AmmoNodes.Count == 1)
+            return AmmoNodes[0];
+
+        var closest = AmmoNodes[0];
+        var minDist = int.MaxValue;
+
+        foreach (var node in AmmoNodes)
+        {
+            var dist = Distance.Manhattan(position, node.Position);
+
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closest = node;
+            }
+        }
+
+        return closest;
+    }
 }
