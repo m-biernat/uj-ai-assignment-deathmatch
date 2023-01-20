@@ -36,11 +36,10 @@ public class PathFinder : MonoBehaviour
             var agentController = _requests.Dequeue();
         
             agentController.SetPath(Find(agentController.CurrentNode, agentController.TargetNode));
+            yield return null;
         }
 
         _active = false;
-
-        yield return null;
     }
 
     public static List<Node> Find(Node start, Node end)

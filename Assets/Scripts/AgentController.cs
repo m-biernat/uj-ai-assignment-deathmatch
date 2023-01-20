@@ -73,12 +73,6 @@ public class AgentController : MonoBehaviour
         _renderer = GetComponent<SpriteRenderer>();
     }
 
-    void Start() 
-    {
-        if (InitialNode != TargetNode)
-            PathFinder.Instance.EnqueueRequest(this);
-    }
-
     void Update() 
         => Debug.DrawRay(transform.position, transform.up, Color.white);
 
