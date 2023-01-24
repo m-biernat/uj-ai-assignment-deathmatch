@@ -74,11 +74,13 @@ public class AgentController : MonoBehaviour
     }
 
     void Update() 
-        => Debug.DrawRay(transform.position, transform.up, Color.white);
+    {
+        Debug.DrawRay(transform.position, transform.up, Color.white);
+    }
 
     public void Respawn()
     {
-        var spawnNode = SpawnNode.GetSpawnNode();
+        Node spawnNode = SpawnNode.GetSpawnNode();
         CurrentNode = spawnNode;
         transform.position = spawnNode.Position;
         
@@ -92,14 +94,14 @@ public class AgentController : MonoBehaviour
         _renderer.enabled = true;
     }
 
-    public void Heal() => Health = MaxHealth;
+    public void Heal() { Health = MaxHealth; }
 
-    public void RefillAmmo() => Ammo = MaxAmmo;
+    public void RefillAmmo() { Ammo = MaxAmmo; }
 
     public bool Detect(out List<GameObject> agents)
     {
         agents = new List<GameObject>();
-        var detected = false;
+        bool detected = false;
 
         _collider.enabled = false;
 
@@ -108,15 +110,13 @@ public class AgentController : MonoBehaviour
             if (agent == this)
                 continue;
 
-            var dir = agent.transform.position - transform.position;
+            Vector3 dir = agent.transform.position - transform.position;
             dir.Normalize();
 
-            if (Vector3.Dot(transform.up, dir) > .5f)
-            {
+            if (Vector3.Dot(transform.up, dir) > .5f) {
                 RaycastHit2D hit = Physics2D.Raycast(transform.position, dir);
 
-                if (hit && hit.collider.CompareTag("Agent"))
-                {
+                if (hit && hit.collider.CompareTag("Agent")) {
                     detected = true;
                     agents.Add(hit.collider.gameObject);
                 }
@@ -149,16 +149,14 @@ public class AgentController : MonoBehaviour
             return null;
 
         GameObject enemyGO = enemies[0];
-        var minDist = Mathf.Infinity;
+        float minDist = Mathf.Infinity;
         
-        if (enemies.Count > 1)
-        {
+        if (enemies.Count > 1) {
             foreach (var enemy in enemies)
             {
-                var dist = Vector3.Distance(transform.position, 
-                                            enemy.transform.position);
-                if (dist < minDist)
-                {
+                float dist = Vector3.Distance(transform.position, 
+                                              enemy.transform.position);
+                if (dist < minDist) {
                     minDist = dist;
                     enemyGO = enemy;
                 }
@@ -175,9 +173,9 @@ public class AgentController : MonoBehaviour
 
         Ammo -= 1;
 
-        var dir = enemy.transform.position - transform.position;
+        Vector3 dir = enemy.transform.position - transform.position;
         
-        var jitter = Random.Range(-ShootAngleJitter, ShootAngleJitter);
+        float jitter = Random.Range(-ShootAngleJitter, ShootAngleJitter);
 
         dir = Quaternion.Euler(0, 0, jitter) * dir;
 
@@ -186,9 +184,8 @@ public class AgentController : MonoBehaviour
         RaycastHit2D hit = Physics2D.Raycast(transform.position, dir);
         Debug.DrawLine(transform.position, hit.point, _renderer.color, 2.0f);
 
-        if (hit.collider.CompareTag("Agent"))
-        {
-            var damage = Random.Range(1, ShootDamageJitter);
+        if (hit.collider.CompareTag("Agent")) {
+            int damage = Random.Range(1, ShootDamageJitter);
             hit.collider?.GetComponent<AgentController>()?.Hit(damage, this);
         }
         
@@ -243,7 +240,7 @@ public class AgentController : MonoBehaviour
         _currentTarget = null;
     }
 
-    public bool Pathless() => _path is null;
+    public bool Pathless() { return _path is null; }
 
     public void FollowPath(System.Action onComplete)
     {
@@ -255,15 +252,15 @@ public class AgentController : MonoBehaviour
             _currentTarget = _path[_path.Count - 1];
         }
 
-        var targetPosition = _currentTarget.Position;
-        var targetDirection = targetPosition - transform.position;
+        Vector3 targetPosition = _currentTarget.Position;
+        Vector3 targetDirection = targetPosition - transform.position;
 
-        var movementStep = MovementSpeed * Time.deltaTime;
-        var movement = Vector3.MoveTowards(transform.position, targetPosition, movementStep);
+        float movementStep = MovementSpeed * Time.deltaTime;
+        Vector3 movement = Vector3.MoveTowards(transform.position, targetPosition, movementStep);
 
-        var rotationStep = RotationSpeed * Time.deltaTime;
-        var targetRotation = Quaternion.LookRotation(Vector3.forward, targetDirection);
-        var rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationStep);
+        float rotationStep = RotationSpeed * Time.deltaTime;
+        Quaternion targetRotation = Quaternion.LookRotation(Vector3.forward, targetDirection);
+        Quaternion rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationStep);
         
         transform.SetPositionAndRotation(movement, rotation);
 
